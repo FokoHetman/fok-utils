@@ -68,6 +68,14 @@ fn parse_event(event: KeyEvent, program: &mut Program) {
     },
     KeyCode::Enter => {
       disable_raw_mode();
+      print!("{esc}[0G", esc = 27 as char);
+      print!("{esc}[2K", esc = 27 as char);
+      for i in 0..program.fokprograms.len() {
+        print!("{esc}[1A", esc = 27 as char);
+        print!("{esc}[2K", esc = 27 as char);
+      }
+
+      let _ = io::stdout().flush();
       println!("{:#?}", Command::new("sh").arg("-c").arg(&format!("{}", program.fokprograms[program.selected_index].runCommand)).exec());
     },
     KeyCode::Arrow(d) => {
@@ -92,6 +100,15 @@ fn parse_event(event: KeyEvent, program: &mut Program) {
         },
         Direction::Right => {
           disable_raw_mode();
+          print!("{esc}[0G", esc = 27 as char);
+          print!("{esc}[2K", esc = 27 as char);
+          for i in 0..program.fokprograms.len() {
+            print!("{esc}[1A", esc = 27 as char);
+            print!("{esc}[2K", esc = 27 as char);
+          }
+
+          let _ = io::stdout().flush();
+
           println!("{:#?}", Command::new("sh").arg("-c").arg(&format!("{}", program.fokprograms[program.selected_index].runCommand)).exec())
         },
         _ => {}
@@ -174,6 +191,12 @@ fn main_loop(mut program: Program) {
     if program.exit {
       break;
     }
+  }
+  print!("{esc}[0G", esc = 27 as char);
+  print!("{esc}[2K", esc = 27 as char);
+  for i in 0..program.fokprograms.len() {
+    print!("{esc}[1A", esc = 27 as char);
+    print!("{esc}[2K", esc = 27 as char);
   }
 }
 
