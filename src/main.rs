@@ -67,6 +67,7 @@ fn parse_event(event: KeyEvent, program: &mut Program) {
       program.exit = true;
     },
     KeyCode::Enter => {
+      disable_raw_mode();
       println!("{:#?}", Command::new("sh").arg("-c").arg(&format!("{}", program.fokprograms[program.selected_index].runCommand)).exec());
     },
     KeyCode::Arrow(d) => {
@@ -90,6 +91,7 @@ fn parse_event(event: KeyEvent, program: &mut Program) {
           program.fokprograms[program.selected_index].selected = true;
         },
         Direction::Right => {
+          disable_raw_mode();
           println!("{:#?}", Command::new("sh").arg("-c").arg(&format!("{}", program.fokprograms[program.selected_index].runCommand)).exec())
         },
         _ => {}
