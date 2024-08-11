@@ -144,14 +144,12 @@ fn redraw(program: Program) {
   }
   let mut output = String::new();
   for i in program.fokprograms {
-    if i.enabled {
-      if i.selected {
-        output += &format!("{esc}[38;5;{SELECTED_COLOR}m{line}{}{line}{esc}[0m", i.name, esc = 27 as char, line=vec!['-'; ((max - i.name.len())/2) as usize].into_iter().collect::<String>());
-      } else {
-        output += &format!("{esc}[38;5;{INACTIVE_COLOR}m{space}{}{space}{esc}[0m", i.name, esc = 27 as char, space=vec![' '; ((max-i.name.len())/2) as usize].into_iter().collect::<String>());
-      }
-      output += "\n";
+    if i.selected {
+      output += &format!("{esc}[38;5;{SELECTED_COLOR}m{line}{}{line}{esc}[0m", i.name, esc = 27 as char, line=vec!['-'; ((max - i.name.len())/2) as usize].into_iter().collect::<String>());
+    } else {
+      output += &format!("{esc}[38;5;{INACTIVE_COLOR}m{space}{}{space}{esc}[0m", i.name, esc = 27 as char, space=vec![' '; ((max-i.name.len())/2) as usize].into_iter().collect::<String>());
     }
+    output += "\n";
   }
   print!("{}", output);
 }
@@ -160,7 +158,6 @@ fn redraw(program: Program) {
 struct FokProgram {
   name: String,
   runCommand: String,
-  enabled: bool,
   selected: bool,
 }
 
@@ -200,13 +197,23 @@ fn main_loop(mut program: Program) {
   }
 }
 
+fn is_available(name: String) -> bool {
+  str::from_utf8(&Command::new("sh").arg("-c").arg(&format!("command -v {}", name)).output().unwrap().stdout).unwrap().to_string() != String::new()
+}
+
 fn main() {
   let mut program = Program {fokprograms: vec![], selected_index: 0, exit: false};
-  program.fokprograms.push(FokProgram {name: String::from("Chess"), runCommand: String::from("chess"), enabled: true, selected: true});
-  program.fokprograms.push(FokProgram {name: String::from("Fok-Quote"), runCommand: String::from("printf \"Quote: \"; read QUOTE;printf \"Author: \";read AUTHOR;fok-quote \"$QUOTE\" \"$AUTHOR\";read NULL"), enabled: true, selected: false});
-
+  if is_available(String::from("chess")) {
+    program.fokprograms.push(FokProgram {name: String::from("Chess"), runCommand: String::from("chess"), selected: true});
+  }
+  if is_available(String::from("fok-quote")) {
+    program.fokprograms.push(FokProgram {name: String::from("Fok-Quote"), runCommand: String::from("printf \"Quote: \"; read QUOTE;printf \"Author: \";read AUTHOR;fok-quote \"$QUOTE\" \"$AUTHOR\";read NULL"), selected: false});
+  }
+  if program.fokprograms.len()==0 {
+    panic!("No fok-programs!");
+  }
   for mut i in 0..program.fokprograms.len() {
-    program.fokprograms[i].enabled = str::from_utf8(&Command::new("sh").arg("-c").arg(&format!("command -v {}", program.fokprograms[i].name.to_lowercase())).output().unwrap().stdout).unwrap().to_string() != String::new();
+    //program.fokprograms[i].enabled = str::from_utf8(&Command::new("sh").arg("-c").arg(&format!("command -v {}", program.fokprograms[i].name.to_lowercase())).output().unwrap().stdout).unwrap().to_string() != String::new();
     print!("\n");
     //println!("{}", program.fokprograms[i].enabled);
   }
